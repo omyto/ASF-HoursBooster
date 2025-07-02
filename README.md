@@ -17,8 +17,8 @@ The `HoursBooster` plugin configuration has the following structure, which is lo
 ```json
 {
   "HoursBooster": {
-    "MaxGames": 5,
-    "Duration": 5,
+    "MaxGames": 1,
+    "Duration": 2,
     "Blacklist": []
   }
 }
@@ -35,8 +35,8 @@ The `HoursBooster` plugin configuration has the following structure, which is lo
   "InventoryLimiterDelay": 5,
   "WebLimiterDelay": 500,
   "HoursBooster": {
-    "MaxGames": 1,
-    "Duration": 8,
+    "MaxGames": 2,
+    "Duration": 3,
     "Blacklist": [ 221380, 813780, 933110, 1017900, 1466860 ]
   }
 }

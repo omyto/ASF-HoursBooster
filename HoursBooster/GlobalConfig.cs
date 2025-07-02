@@ -6,8 +6,8 @@ using ArchiSteamFarm.Helpers.Json;
 namespace HoursBooster;
 
 public sealed class GlobalConfig {
-  public const byte DefaultMaxGames = 5;
-  public const byte DefaultDuration = 5;
+  public const byte DefaultMaxGames = 1;
+  public const byte DefaultDuration = 2;
 
   /// Maximum number of games to boost concurrently
   [JsonInclude]
