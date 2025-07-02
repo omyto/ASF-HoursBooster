@@ -6,6 +6,7 @@ using JetBrains.Annotations;
 
 namespace HoursBooster;
 
+#pragma warning disable CA1812 // ASF uses this class during runtime
 [UsedImplicitly]
 internal sealed class HoursBoosterPlugin : IGitHubPluginUpdates {
   public string Name => nameof(HoursBoosterPlugin);
@@ -17,3 +18,4 @@ internal sealed class HoursBoosterPlugin : IGitHubPluginUpdates {
     return Task.CompletedTask;
   }
 }
+#pragma warning restore CA1812 // ASF uses this class during runtime

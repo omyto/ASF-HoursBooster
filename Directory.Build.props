@@ -2,7 +2,7 @@
 	<Import Project="ArchiSteamFarm/Directory.Build.props" />
 
 	<PropertyGroup>
-		<PluginName>ASF-HoursBooster</PluginName>
+		<PluginName>HoursBooster</PluginName>
 		<Version>1.0.0.0</Version>
 	</PropertyGroup>
 
