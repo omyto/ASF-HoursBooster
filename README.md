@@ -46,9 +46,9 @@ The `HoursBooster` plugin configuration has the following structure, which is lo
 #### Explanation
 
 | Configuration | Type        | Default | Range   | Description                                                 |
-|---------------|-------------|---------|---------|-------------------------------------------------------------|
-| MaxGames      | Number      | 1       | 1-32    | The maximum number of games to be played at the same time.  |
-| Duration      | Number      | 30      | 1-255   | The duration (in hours) each batch of games will be played. |
+|---------------|-------------|:-------:|:-------:|-------------------------------------------------------------|
+| MaxGames      | Number      | 5       | 1-32    | The maximum number of games to be played at the same time.  |
+| Duration      | Number      | 5       | 1-255   | The duration (in hours) each batch of games will be played. |
 | Blacklist     | List Number |         |         | A list of Steam game IDs that are excluded from farming.    |
 
 ### Commands
