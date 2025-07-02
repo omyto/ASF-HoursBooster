@@ -13,14 +13,11 @@ using SteamKit2;
 namespace HoursBooster;
 
 internal sealed class BoosterEngine(Bot bot) {
-  private readonly int MaxGames = 10; // Maximum number of games to boost concurrently
-  private readonly int Duration = 5; // Duration in hours for each game to be boosted
-  private readonly List<uint> Blacklist = [570]; // List of games to exclude from boosting
-
   private Bot Bot { get; } = bot;
   private Timer? Timer { get; set; }
   private List<uint> BoostedGames { get; set; } = [];
   private List<uint> PlayingGames { get; set; } = [];
+  private Dictionary<uint, string>? OwnedGames { get; set; }
 
   /// Disposes the BoosterEngine, stopping any ongoing heartbeating process and releasing resources.
   internal void Dispose() {
@@ -64,6 +61,10 @@ internal sealed class BoosterEngine(Bot bot) {
   /// Starts the heartbeating process to boost games.
   private async void Heartbeating(object? state) {
     if (Bot.IsConnectedAndLoggedOn && Bot.IsPlayingPossible) {
+      if (PlayingGames.Count > 0) {
+        LogInfo("Switching to booosting another games");
+      }
+
       PlayingGames = await GetGamesToBoost().ConfigureAwait(false);
       if (PlayingGames.Count == 0) {
         LogInfo("No games to boost");
@@ -78,12 +79,19 @@ internal sealed class BoosterEngine(Bot bot) {
         return;
       }
 
+      int duration = HoursBoosterPlugin.GlobalConfig.Duration > 0 ? HoursBoosterPlugin.GlobalConfig.Duration : GlobalConfig.DefaultDuration;
+
       foreach (uint appID in PlayingGames) {
         BoostedGames.Add(appID);
-        LogInfo($"Boosting game {appID} for {Duration} hours");
+        if (OwnedGames?.TryGetValue(appID, out string? name) == true) {
+          LogInfo($"Boosting game {appID} ({name}) for {duration} hours");
+        }
+        else {
+          LogInfo($"Boosting game {appID} for {duration} hours");
+        }
       }
 
-      _ = Timer?.Change(TimeSpan.FromHours(Duration), Timeout.InfiniteTimeSpan);
+      _ = Timer?.Change(TimeSpan.FromHours(duration), Timeout.InfiniteTimeSpan);
     }
     else {
       LogInfo("Bot is not connected or playing is not possible");
@@ -93,29 +101,31 @@ internal sealed class BoosterEngine(Bot bot) {
   /// Retrieves a list of games to boost.
   [SuppressMessage("Style", "IDE0305:Simplify collection initialization", Justification = "<Pending>")]
   private async Task<List<uint>> GetGamesToBoost() {
-    Dictionary<uint, string>? ownedGames = await Bot.ArchiHandler.GetOwnedGames(Bot.SteamID).ConfigureAwait(false);
-    if (ownedGames == null || ownedGames.Count == 0) {
+    OwnedGames = await Bot.ArchiHandler.GetOwnedGames(Bot.SteamID).ConfigureAwait(false);
+    if (OwnedGames == null || OwnedGames.Count == 0) {
       return [];
     }
 
-    HashSet<uint> validGames = ownedGames.Keys.ToHashSet();
+    HashSet<uint> validGames = OwnedGames.Keys.ToHashSet();
 
     if (ASF.GlobalConfig != null && ASF.GlobalConfig.Blacklist.Count > 0) {
       validGames.ExceptWith(ASF.GlobalConfig.Blacklist);
     }
 
-    if (Blacklist.Count > 0) {
-      validGames.ExceptWith(Blacklist);
+    if (HoursBoosterPlugin.GlobalConfig.Blacklist.Count > 0) {
+      validGames.ExceptWith(HoursBoosterPlugin.GlobalConfig.Blacklist);
     }
 
     List<uint> waitingGames = validGames.Except(BoostedGames).ToList();
 
+    int maxGames = HoursBoosterPlugin.GlobalConfig.MaxGames is > 0 and <= 32 ? HoursBoosterPlugin.GlobalConfig.MaxGames : GlobalConfig.DefaultMaxGames;
+
     if (waitingGames.Count > 0) {
-      return waitingGames.Take(MaxGames).ToList();
+      return waitingGames.Take(maxGames).ToList();
     }
 
     BoostedGames.Clear();
-    return validGames.Take(MaxGames).ToList();
+    return validGames.Take(maxGames).ToList();
   }
 
   /// 

@@ -4,8 +4,10 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using ArchiSteamFarm.Core;
+using ArchiSteamFarm.Helpers.Json;
 using ArchiSteamFarm.Localization;
 using ArchiSteamFarm.Plugins.Interfaces;
 using ArchiSteamFarm.Steam;
@@ -17,8 +19,9 @@ namespace HoursBooster;
 
 #pragma warning disable CA1812 // ASF uses this class during runtime
 [UsedImplicitly]
-internal sealed class HoursBoosterPlugin : IBot, IBotCommand2, IBotSteamClient, IGitHubPluginUpdates {
+internal sealed class HoursBoosterPlugin : IASF, IBot, IBotCommand2, IBotSteamClient, IGitHubPluginUpdates {
   public const string PluginName = "HoursBooster";
+  public static GlobalConfig GlobalConfig { get; private set; } = new();
   public string Name => PluginName;
   public string RepositoryName => "omyto/ASF-HoursBooster";
   public Version Version => typeof(HoursBoosterPlugin).Assembly.GetName().Version ?? throw new InvalidOperationException(nameof(Version));
@@ -27,6 +30,18 @@ internal sealed class HoursBoosterPlugin : IBot, IBotCommand2, IBotSteamClient, 
 
   public Task OnLoaded() {
     ASF.ArchiLogger.LogGenericInfo("HoursBooster - Let your games play themselves!");
+    return Task.CompletedTask;
+  }
+
+  public Task OnASFInit(IReadOnlyDictionary<string, JsonElement>? additionalConfigProperties) {
+    if (additionalConfigProperties != null && additionalConfigProperties.Count > 0) {
+      if (additionalConfigProperties.TryGetValue(PluginName, out JsonElement configValue)) {
+        GlobalConfig? config = configValue.ToJsonObject<GlobalConfig>();
+        if (config != null) {
+          GlobalConfig = config;
+        }
+      }
+    }
     return Task.CompletedTask;
   }
 
