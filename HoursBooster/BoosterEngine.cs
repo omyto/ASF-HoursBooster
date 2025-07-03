@@ -100,6 +100,7 @@ internal sealed class BoosterEngine(Bot bot) {
 
   /// Retrieves a list of games to boost.
   [SuppressMessage("Style", "IDE0305:Simplify collection initialization", Justification = "<Pending>")]
+  [SuppressMessage("Security", "CA5394:Do not use insecure randomness", Justification = "<Pending>")]
   private async Task<List<uint>> GetGamesToBoost() {
     OwnedGames = await Bot.ArchiHandler.GetOwnedGames(Bot.SteamID).ConfigureAwait(false);
     if (OwnedGames == null || OwnedGames.Count == 0) {
@@ -121,7 +122,8 @@ internal sealed class BoosterEngine(Bot bot) {
     int maxGames = HoursBoosterPlugin.GlobalConfig.MaxGames is > 0 and <= 32 ? HoursBoosterPlugin.GlobalConfig.MaxGames : GlobalConfig.DefaultMaxGames;
 
     if (waitingGames.Count > 0) {
-      return waitingGames.Take(maxGames).ToList();
+      int skip = waitingGames.Count > maxGames ? Random.Shared.Next(0, waitingGames.Count - maxGames + 1) : 0;
+      return waitingGames.Skip(skip).Take(maxGames).ToList();
     }
 
     BoostedGames.Clear();
